@@ -1,0 +1,4 @@
+Django
+django-rest-framework
+psycopg2-binary
+python-decouple
