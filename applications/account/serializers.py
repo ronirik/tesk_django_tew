@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework import serializers
+from .utils import send_activation_email
 
 
 User = get_user_model()
@@ -14,11 +15,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ('email','first_name', 'last_name', 'password', 'password_confirmation')
 
     def validate_email(self, email):
         if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError('User with given email already exist')
+            raise serializers.ValidationError('User already exist')
         return email
 
     def validate(self, validated_data):
@@ -33,7 +34,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         password = validated_data.get('password')
         first_name = validated_data.get('first_name')
         last_name = validated_data.get('last_name')
-        user = User.objects.create_user(email, password, first_name, last_name)
+        user = User.objects.create_user(email, password, first_name, last_name, password)
+        send_activation_email(user.email, user.activation_code)
         return user
 
 
